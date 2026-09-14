@@ -45,7 +45,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'D.middleware.CorsMiddleware', # 追加
+    'corsheaders.middleware.CorsMiddleware', # 追加(別のURLで動作するフロントエンドからのアクセスを許可する)
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

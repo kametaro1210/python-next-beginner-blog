@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import Post
 
-# Register your models here.
+# PostモデルをDjango管理画面に登録
+admin.site.register(Post)
