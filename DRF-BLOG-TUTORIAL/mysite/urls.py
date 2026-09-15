@@ -15,8 +15,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+
+# 画像などのアップロードデータを開発環境で表示するために使用
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
+    # Django管理画面
     path('admin/', admin.site.urls),
+    
+    # /api/ へのアクセスを app/urls.py に渡す
+    path('api/', include('app.urls')),
 ]
+
+# 開発モードのときだけ、アップロードデータを表示できるようにする
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
