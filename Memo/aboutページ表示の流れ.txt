@@ -1,0 +1,114 @@
+==================================================
+about ページ表示の流れ
+==================================================
+
+## 1. about ページの記述場所
+
+Next.js 16 の App Router では、以下のファイルに about ページを記述する。
+
+```text
+next-blog-tutorial/
+└─ app/
+	 └─ about/
+			└─ page.tsx
+```
+
+`app/about/page.tsx`:
+
+```tsx
+export default function About() {
+	return <div>about</div>;
+}
+```
+
+`app` 配下のフォルダー名が URL のパスになるため、このページは以下の URL で表示される。
+
+```text
+http://localhost:3000/about
+```
+
+## 2. 各ファイルの役割
+
+### `app/about/page.tsx`
+
+about ページ固有の内容を記述する。
+
+### `app/layout.tsx`
+
+アプリケーション全体のルートレイアウト。
+
+- `globals.css` を読み込む
+- ページタイトルや説明文を設定する
+- `children` として各ページの内容を受け取る
+- `Layout` コンポーネントへページの内容を渡す
+
+```tsx
+<Layout>{children}</Layout>
+```
+
+### `components/layout/layout.tsx`
+
+共通レイアウトを記述する。
+
+- `Navigation` を表示する
+- `children` をメイン領域に表示する
+- 共通のフッターを表示する
+
+```tsx
+<Navigation />
+
+<main>
+	{children}
+</main>
+
+<footer>...</footer>
+```
+
+### `components/layout/navigation.tsx`
+
+ヘッダーとページへのリンクを記述する。
+
+about ページへのリンク:
+
+```tsx
+<Link href="/about" className="mr-5">
+	About
+</Link>
+```
+
+このリンクをクリックすると、`/about` に移動する。
+
+## 3. about ページが表示されるまでの流れ
+
+```text
+ブラウザーで /about にアクセス
+				↓
+app/about/page.tsx が読み込まれる
+				↓
+app/layout.tsx がページを children として受け取る
+				↓
+components/layout/layout.tsx に children を渡す
+				↓
+共通ヘッダー、about ページ、フッターの順に表示される
+```
+
+## 4. 表示内容
+
+ブラウザーには、以下の構成で表示される。
+
+```text
+ヘッダー
+	NextJS Startup / About リンク
+
+メイン領域(main)
+	about
+
+フッター
+	© 2026 NextJS Startup
+```
+
+開発サーバーを起動するコマンド:
+
+```powershell
+npm run dev
+```
