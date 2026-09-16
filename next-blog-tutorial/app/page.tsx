@@ -1,7 +1,7 @@
 export default function Home() {
-	return (
-		<h1 className="text-3xl font-bold underline">
-			Hello, TailwindCSS!
-		</h1>
-	);
+  return (
+    <h1 className="flex h-screen items-center justify-center text-9xl text-indigo-500">
+        TailwindCSS
+    </h1>
+  );
 }
