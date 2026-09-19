@@ -1,0 +1,190 @@
+==================================================
+NextJS の記述ルール
+==================================================
+
+## 1. Next.js が決めているファイル名を守る
+
+`app` フォルダー内のファイル名には、Next.js が役割を判断するための決まりがある。
+
+```text
+app/page.tsx
+	トップページ（/）
+
+app/about/page.tsx
+	about ページ（/about）
+
+app/layout.tsx
+	全ページ共通のレイアウト
+
+app/posts/[id]/page.tsx
+	ID が変わる投稿詳細ページ
+```
+
+ページとして表示したい場合は、基本的にファイル名を `page.tsx` にする。
+`home.tsx` や `about.tsx` という名前にすると、URL に対応するページとして自動認識されない。
+
+## 2. 動的な URL は `[名前]` で作る
+
+```text
+app/posts/[id]/page.tsx
+```
+
+`[id]` は URL の値を受け取るための特別なフォルダー名。
+
+```text
+/posts/1  → id = "1"
+/posts/2  → id = "2"
+```
+
+フォルダー名を `[id]` にした場合、コードでも `params.id` として受け取る。
+フォルダー名を `[slug]` にした場合は、`params.slug` になる。
+
+## 3. TypeScript の拡張子を使う
+
+```text
+.tsx
+	TypeScript と JSX を書くファイル
+
+.ts
+	TypeScript の処理や型を書くファイル
+```
+
+このプロジェクトでは、次のように使い分ける。
+
+```text
+page.tsx       画面を表示する JSX がある
+layout.tsx     レイアウトの JSX がある
+post.tsx       コンポーネントの JSX がある
+posts.ts       API 通信や型定義だけを行う
+```
+
+## 4. ページやコンポーネントは default export する
+
+Next.js がページやコンポーネントを読み込めるように、基本的に `export default` を付ける。
+
+```tsx
+export default function About() {
+	return <div>about</div>;
+}
+```
+
+読み込むときは、次のように import する。
+
+```tsx
+import Post from "@/components/post/post";
+```
+
+## 5. 型は `type` で定義する
+
+API のデータなど、決まった形のデータは型を定義してから使用する。
+
+```tsx
+export type Post = {
+	id: number;
+	title: string;
+	image: string;
+	content: string;
+	created_at: string;
+};
+```
+
+別のファイルで使用するときは、型として import する。
+
+```tsx
+import type { Post } from "@/lib/posts";
+```
+
+コンポーネント名と型名が重なる場合は、`as` で別名を付ける。
+
+```tsx
+import type { Post as PostData } from "@/lib/posts";
+```
+
+この場合、`Post` 型をそのファイル内では `PostData` という名前で使用する。
+
+## 6. import の場所を確認する
+
+```tsx
+import Layout from "@/components/layout/layout";
+```
+
+`@/` はプロジェクト直下を表す。このプロジェクトでは、長い相対パスより `@/` を使用する。
+
+```text
+@/components/layout/layout
+	↓
+next-blog-tutorial/components/layout/layout.tsx
+```
+
+ファイルを移動した場合は、import のパスも実際の場所に合わせて変更する。
+
+## 7. API 通信には async と await を使う
+
+Django API など、結果が返るまで時間がかかる処理には `async` と `await` を使う。
+
+```tsx
+export default async function Home() {
+	const posts = await getAllPostsData();
+	return <div>{/* posts を表示 */}</div>;
+}
+```
+
+- `async`: 非同期処理を行う関数であることを示す
+- `await`: API の結果が返るまで待つ
+- `Promise<Post[]>`: 最終的に投稿一覧を返すことを型で示す
+
+## 8. コンポーネントへ渡す値は props で型付けする
+
+```tsx
+type PostProps = {
+	post: PostData;
+};
+
+export default function Post({ post }: PostProps) {
+	return <p>{post.title}</p>;
+}
+```
+
+`post` は投稿データを受け取る props であり、`PostData` の形でなければならない。
+
+呼び出す側は、投稿データを `post` という名前で渡す。
+
+```tsx
+<Post post={post} />
+```
+
+## 9. Link でページ移動する
+
+Next.js のページ移動には `next/link` の `Link` を使用する。
+
+```tsx
+import Link from "next/link";
+
+<Link href="/about">About</Link>
+```
+
+`href` の値は、移動先の URL と一致させる。
+
+```text
+href="/about"       → app/about/page.tsx
+href="/posts/1"     → app/posts/[id]/page.tsx
+```
+
+## 10. ファイルを作成したら確認する
+
+ファイル名や import の間違いは、TypeScript のチェックで確認できる。
+
+```powershell
+cd "\python-next-beginner-blog\next-blog-tutorial"
+npx tsc --noEmit
+```
+
+エラーが表示された場合は、次の項目を確認する。
+
+```text
+・ファイル名やフォルダー名が正しいか
+・import のパスが正しいか
+・export default が付いているか
+・props や API データの型が合っているか
+・page.tsx の場所が URL の構成と合っているか
+```

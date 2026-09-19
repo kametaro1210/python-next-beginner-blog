@@ -1,0 +1,163 @@
+==================================================
+Next.js でページが表示される流れ
+==================================================
+
+## 全体の関連図
+
+```text
+ブラウザー
+    │ URL にアクセス
+    ▼
+app/page.tsx または app/about/page.tsx
+    │ ページの内容を作成
+    ▼
+app/layout.tsx
+    │ children としてページ内容を受け取る
+    ▼
+components/layout/layout.tsx
+    │ 共通の画面構成を作る
+    ├───────────────┐
+    ▼               ▼
+navigation.tsx    children
+ヘッダー・リンク    ページ本文
+    │               │
+    └───────┬───────┘
+	    ▼
+	  footer
+	    │
+	    ▼
+      ブラウザーに表示
+```
+
+## ファイルの役割
+
+```text
+app/page.tsx
+    トップページの内容を書く
+
+app/about/page.tsx
+    about ページの内容を書く
+
+app/layout.tsx
+    すべてのページに共通する入口
+    globals.css と共通 Layout を読み込む
+
+components/layout/layout.tsx
+    ヘッダー、本文、フッターの枠を作る
+
+components/layout/navigation.tsx
+    サイト名とページ移動リンクを表示する
+
+components/post/post.tsx
+    投稿1件分の画像とタイトルを表示する
+
+lib/posts.ts
+    Django API から投稿データを取得する
+```
+
+## トップページ `/` の流れ
+
+```text
+http://localhost:3000/
+	│
+	▼
+app/page.tsx
+	│ getAllPostsData() を呼び出す
+	▼
+lib/posts.ts
+	│ fetch で API を呼び出す
+	▼
+Django API
+http://127.0.0.1:8000/api/post/
+	│ 投稿一覧を返す
+	▼
+app/page.tsx の posts
+	│ posts.map() で1件ずつ処理
+	▼
+components/post/post.tsx
+	│ 投稿画像とタイトルを表示
+	▼
+トップページに投稿一覧が表示される
+```
+
+## about ページ `/about` の流れ
+
+```text
+navigation.tsx の About をクリック
+	│
+	▼
+http://localhost:3000/about
+	│
+	▼
+app/about/page.tsx
+	│
+	▼
+about ページの内容
+	│
+	▼
+app/layout.tsx
+	│ 共通レイアウトで囲む
+	▼
+ヘッダー + about 本文 + フッター
+```
+
+## 投稿詳細ページ `/posts/1` の流れ
+
+```text
+投稿カードをクリック
+	│ Link href="/posts/1"
+	▼
+app/posts/[id]/page.tsx
+	│ URL から id = "1" を取得
+	▼
+lib/posts.ts の getPostData("1")
+	│
+	▼
+Django API
+http://127.0.0.1:8000/api/post/1/
+	│ 投稿詳細を返す
+	▼
+app/posts/[id]/page.tsx
+	│ title、created_at、content を表示
+	▼
+投稿詳細ページが表示される
+```
+
+## 各ファイルの読み込み関係
+
+```text
+app/layout.tsx
+    │
+    ├─ app/globals.css
+    └─ components/layout/layout.tsx
+	    │
+	    └─ components/layout/navigation.tsx
+
+app/page.tsx
+    │
+    ├─ components/post/post.tsx
+    └─ lib/posts.ts
+	    │
+	    └─ Django REST API
+
+app/posts/[id]/page.tsx
+    └─ lib/posts.ts
+	    │
+	    └─ Django REST API
+```
+
+## 覚え方
+
+```text
+app
+    ページを作る場所
+
+components
+    画面の部品を作る場所
+
+lib
+    API 通信などの処理を置く場所
+
+layout
+    すべてのページに共通する枠
+
